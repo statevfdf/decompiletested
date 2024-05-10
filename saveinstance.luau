@@ -918,7 +918,7 @@ local function synsaveinstance(CustomOptions, CustomOptions2)
 		SaveNonCreatable = false, --Description: Includes non-serializable instances as Folder objects (Name is misleading as this is mostly a fix for certain NilInstances and isn't always related to NotCreatable)
 		NotCreatableFixes = { "Player", "PlayerScripts", "PlayerGui" }, -- {"Player"} is the same as {Player = "Folder"}; Format like {SpawnLocation = "Part"} is only to be used when SpawnLocation inherits from "Part" AND "Part" is Creatable
 		RemovePlayerCharacters = true, -- Description: Ignore player characters while saving. (Enables SaveNonCreatable automatically)
-		SavePlayers = false, -- This option does save players, it's just they won't show up in Studio and can only be viewed through the place file code (in text editor). More info at https://github.com/luau/UniversalSynSaveInstance/issues/2
+		SavePlayers = true, -- This option does save players, it's just they won't show up in Studio and can only be viewed through the place file code (in text editor). More info at https://github.com/luau/UniversalSynSaveInstance/issues/2
 		SaveCacheInterval = 0x1600 * 2, -- The less the more often it saves, but that would mean less performance due to constantly saving
 		ReadMe = true,
 		SafeMode = false, -- Description: Kicks you before Saving, which prevents you from being detected in certain games
@@ -1965,6 +1965,8 @@ local function synsaveinstance(CustomOptions, CustomOptions2)
 				"--[[\n"
 					.. [[
 		Thank you for using stanislucky's Model Exporter (Aka UniversalSynapseSaveinstance, but Modified)
+		(This system saves all the models under workspace, only!)
+		IMPORTANT NOTICE: Player's Characters are NOT going to show up, although you will be able to see them in the code editor. (XML)
 
 		If you didn't save in Binary - we recommended to save the game right away to take advantage of the binary format & to preserve values of certain properties if you used IgnoreDefaultProperties setting (as they might change in the future).
 		You can do that by going to FILE -> Save to File As -> Make sure File Name ends with .rbxl -> Save
