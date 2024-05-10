@@ -1966,7 +1966,7 @@ local function synsaveinstance(CustomOptions, CustomOptions2)
 					.. [[
 		Thank you for using stanislucky's Model Exporter (Aka UniversalSynapseSaveinstance, but Modified)
 		(This system saves all the models under workspace, only!)
-		IMPORTANT NOTICE: Player's Characters are NOT going to show up, although you will be able to see them in the code editor. (XML)
+		IMPORTANT NOTICE: (If > SavePlayers option was set to 'true' then: Player's Characters are NOT going to show up, although you will be able to see them in the code editor. (XML)
 
 		If you didn't save in Binary - we recommended to save the game right away to take advantage of the binary format & to preserve values of certain properties if you used IgnoreDefaultProperties setting (as they might change in the future).
 		You can do that by going to FILE -> Save to File As -> Make sure File Name ends with .rbxl -> Save
