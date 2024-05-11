@@ -856,7 +856,7 @@ local function synsaveinstance(CustomOptions, CustomOptions2)
 		mode = "optimized", -- Change this to invalid mode like "custom" if you only want extrainstances; -- ! "optimized" mode is NOT supported with OPTIONS.Object option
 		noscripts = false,
 		scriptcache = true,
-		decomptype = "", -- * "custom" - @Lonegwadiwaitor's custom decompiler
+		decomptype = "custom", -- * "custom" - @Lonegwadiwaitor's custom decompiler
 		timeout = 10, -- Description: If the decompilation run time exceeds this value it gets cancelled; Set to -1 to disable timeout (unreliable)
 		--* New:
 		__DEBUG_MODE = false, -- Recommended to enable if you wish to help us improve our products and find bugs / issues with it!
