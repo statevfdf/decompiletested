@@ -1232,9 +1232,6 @@ local function synsaveinstance(CustomOptions, CustomOptions2)
 			for _, x in
 				{
 					"Workspace",
-					"StarterGui",
-					"ReplicatedStorage",
-					"ReplicatedFirst",
 				}
 			do
 				table.insert(tmp, service[x])
