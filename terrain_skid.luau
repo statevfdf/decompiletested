@@ -124,7 +124,7 @@ local function splitData(bigString)
 	folder.Name = "TerrainSkidResult"
 	folder.Parent = workspace
 	for diddy, chunk in pairs(bigString) do
-		local chunkSize = 120000
+		local chunkSize = 20000
 		local chunks = {}
 		local i = 1
 		while i <= #chunk do
