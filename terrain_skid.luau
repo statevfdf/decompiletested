@@ -1,11 +1,14 @@
 local TERRAIN = workspace.Terrain
 local VOXEL_RESOLUTION = 4
-local CHUNK_SIZE = 1000
-local terrainSize = TERRAIN.ExtentsSize
+local CHUNK_SIZE = (700 / 4);
+local terrainSize = {
+	X = 3500;
+	Y = 900;
+	Z = 3500;
+};
 local regionMin = Vector3.new(-terrainSize.X / 2, 0, -terrainSize.Z / 2)
 local regionMax = Vector3.new(terrainSize.X / 2, terrainSize.Y, terrainSize.Z / 2)
 local TerrainData = {}
-
 local dictionary, length = {}, 0
 for i = 32, 127 do
 	if i ~= 34 and i ~= 92 then
@@ -14,7 +17,6 @@ for i = 32, 127 do
 		length = length + 1
 	end
 end
-
 local escapemap = {}
 for i = 1, 34 do
 	i = ({34, 92, 127})[i-31] or i
@@ -26,13 +28,11 @@ local function escape(s)
 		return "\127"..escapemap[c]
 	end))
 end
-
 local function unescape(s)
 	return (s:gsub("\127(.)", function(c)
 		return escapemap[c]
 	end))
 end
-
 local function copy(t)
 	local new = {}
 	for k, v in pairs(t) do
@@ -40,7 +40,6 @@ local function copy(t)
 	end
 	return new
 end
-
 local function tobase93(n)
 	local value = ""
 	repeat
@@ -50,7 +49,6 @@ local function tobase93(n)
 	until n == 0
 	return value
 end
-
 local function tobase10(value)
 	local n = 0
 	for i = 1, #value do
@@ -58,7 +56,6 @@ local function tobase10(value)
 	end
 	return n
 end
-
 local function compress(text)
 	local dictionary = copy(dictionary)
 	local key, sequence, size = "", {}, #dictionary
@@ -87,7 +84,6 @@ local function compress(text)
 	spans[width] = span
 	return table.concat(spans, ",").."|"..table.concat(sequence)
 end
-
 local function decompress(text)
 	local dictionary = copy(dictionary)
 	local sequence, spans, content = {}, text:match("(.-)|(.*)")
@@ -118,13 +114,26 @@ local function decompress(text)
 	end
 	return unescape(table.concat(sequence))
 end
-
+local Screen = Instance.new("ScreenGui", if game:GetService("RunService"):IsStudio() then game.StarterGui else game.Players.LocalPlayer.PlayerGui);
+Screen.Name = "notifier";
+Screen.DisplayOrder = 999;
+local Tlab = Instance.new("TextLabel", Screen);
+Tlab.Size = UDim2.new(0.35, 0, 0.4, 0);
+Tlab.ZIndex = 100;
+Tlab.TextScaled = true;
+Tlab.Text = "Loading System..";
+local function setInfo(info: string)
+	if Screen and Tlab and Tlab.Parent == Screen then
+		Tlab.Text = tostring(info);
+	end
+end
 local function splitData(bigString)
 	local folder = Instance.new("Folder")
 	folder.Name = "TerrainSkidResult"
 	folder.Parent = workspace
 	for diddy, chunk in pairs(bigString) do
-		local chunkSize = 20000
+		setInfo("Writing Datachunks for "..tostring(diddy).."!");
+		local chunkSize = 120000
 		local chunks = {}
 		local i = 1
 		while i <= #chunk do
@@ -137,11 +146,10 @@ local function splitData(bigString)
 			chunkValue.Value = tostring(k);
 			chunkValue.Parent = folder
 		end
-		task.wait(0.5);
+		game:GetService("RunService").RenderStepped:Wait();
 	end
 	return folder;
 end
-
 local function combineData(folder: Folder)
 	local Count = 1
 	local Total = {}
@@ -160,7 +168,6 @@ local function combineData(folder: Folder)
 	end
 	return Total
 end
-
 local function spoof(tab)
 	local Typ = typeof(tab)
 	local Clone = tab
@@ -177,7 +184,6 @@ local function spoof(tab)
 	end
 	return tab
 end
-
 local function unspoof(tab)
 	local Typ = typeof(tab)
 	if Typ == "string" then
@@ -189,10 +195,7 @@ local function unspoof(tab)
 			return Vector3.new(tonumber(result[1]), tonumber(result[2]), tonumber(result[3]))
 		elseif tab:sub(1, 8) == "Region3_" then
 			local maxStr = tab:sub(9)
-			warn("max str: "..tostring(maxStr));
 			local result = string.split(tostring(maxStr), "|")
-			warn("result 1: "..tostring(result[1]));
-			warn("result 2: "..tostring(result[2]));
 			local minVec = unspoof(result[1])  -- Convert first part to Vector3
 			local maxVec = unspoof(result[2])  -- Convert second part to Vector3
 			return Region3.new(minVec, maxVec)  -- Create the Region3 using Vector3 values
@@ -208,14 +211,12 @@ local function unspoof(tab)
 	end
 	return tab
 end
-
 local function copyChunk(region)
 	local materials, occupancies = TERRAIN:ReadVoxels(region, VOXEL_RESOLUTION)
 	return materials, occupancies
 end
-
 local function rebuildTerrain(TerrainData)
-	for _, chunk in ipairs(TerrainData) do
+	for pack, chunk in ipairs(TerrainData) do
 		chunk = decompress(chunk);
 		chunk = game:GetService("HttpService"):JSONDecode(chunk);
 		for i, v in ipairs(chunk.materials) do
@@ -224,22 +225,27 @@ local function rebuildTerrain(TerrainData)
 		for i, v in ipairs(chunk.occupancies) do
 			unspoof(v)
 		end
+		setInfo("Rebuilding Terrain! ("..tostring(pack).." / "..tostring(#TerrainData)..")");
 		chunk.region = unspoof(chunk.region)
-		print("Writing Chunk:", chunk.region.CFrame.Position)
 		TERRAIN:WriteVoxels(chunk.region, VOXEL_RESOLUTION, chunk.materials, chunk.occupancies)
-		task.wait(0.5);
+		game:GetService("RunService").RenderStepped:Wait();
 	end
 end
-
+local start = tick();
+setInfo("Getting Ready!");
+local TotalSubChunks = math.round((terrainSize.X * terrainSize.Y * terrainSize.Z) / (CHUNK_SIZE^3));
+setInfo("Reading Terrain: (0 / "..tostring(TotalSubChunks)..") Estimated.");
+local Read = 0;
 for x = regionMin.X, regionMax.X, CHUNK_SIZE do
 	for y = regionMin.Y, regionMax.Y, CHUNK_SIZE do
 		for z = regionMin.Z, regionMax.Z, CHUNK_SIZE do
+			Read += 1;
 			local chunkMin = Vector3.new(x, y, z)
 			local chunkMax = Vector3.new(math.min(x + CHUNK_SIZE, regionMax.X), 
 				math.min(y + CHUNK_SIZE, regionMax.Y), 
 				math.min(z + CHUNK_SIZE, regionMax.Z))
 			local region = Region3.new(chunkMin, chunkMax)
-			print("Reading Chunk:", chunkMin, chunkMax)
+			setInfo("Reading Terrain: ("..tostring(Read).." / "..tostring(TotalSubChunks)..") Estimated.");
 			local materials, occupancies = copyChunk(region)
 			local Ohmygawd = {
 				region = "Region3_"..spoof(chunkMin).."|"..spoof(chunkMax),
@@ -249,10 +255,12 @@ for x = regionMin.X, regionMax.X, CHUNK_SIZE do
 			Ohmygawd = tostring(game:GetService("HttpService"):JSONEncode(Ohmygawd));
 			Ohmygawd = tostring(compress(Ohmygawd));
 			table.insert(TerrainData, Ohmygawd);
-			task.wait(1);
+			game:GetService("RunService").RenderStepped:Wait();
 		end
 	end
 end
-
-task.wait(1)
+setInfo("Finished Reading Terrain!");
+task.wait(1);
+setInfo("Compiling Data!");
 local Folder = splitData(TerrainData);
+setInfo("Compiling Finished Succesfully!");
