@@ -2,9 +2,9 @@ local TERRAIN = workspace.Terrain
 local VOXEL_RESOLUTION = 4
 local CHUNK_SIZE = (700 / 4);
 local terrainSize = {
-	X = 3500;
-	Y = 900;
-	Z = 3500;
+	X = 2850;
+	Y = 700;
+	Z = 2850;
 };
 local regionMin = Vector3.new(-terrainSize.X / 2, 0, -terrainSize.Z / 2)
 local regionMax = Vector3.new(terrainSize.X / 2, terrainSize.Y, terrainSize.Z / 2)
